@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { ArrowLeft, ArrowRight, ChevronLeft, ChevronRight, User } from "lucide-react";
+import { ArrowLeft, ArrowRight, ChevronLeft, ChevronRight, User, CheckCircle2 } from "lucide-react";
 import {
   CLINIC_TIMEZONE,
   azWeekdayShort,
@@ -24,7 +24,6 @@ function todayIsoInBaku(): string {
 }
 
 function addDaysIso(iso: string, days: number): string {
-  // Use noon UTC to avoid DST edge cases when adding days.
   const [y, m, d] = iso.split("-").map((s) => Number.parseInt(s, 10));
   const base = new Date(Date.UTC(y ?? 0, (m ?? 1) - 1, d ?? 1, 12, 0, 0));
   base.setUTCDate(base.getUTCDate() + days);
@@ -52,7 +51,6 @@ export function Step2Doctor({ service, selected, onSelect, onBack, onNext }: Ste
   const [slotsLoading, setSlotsLoading] = useState(false);
   const [slotsError, setSlotsError] = useState<string | null>(null);
 
-  // Load doctors once
   useEffect(() => {
     let cancelled = false;
     async function load() {
@@ -79,7 +77,6 @@ export function Step2Doctor({ service, selected, onSelect, onBack, onNext }: Ste
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Load slots whenever doctor or date changes
   useEffect(() => {
     if (!activeDoctorId) return;
     let cancelled = false;
@@ -118,7 +115,6 @@ export function Step2Doctor({ service, selected, onSelect, onBack, onNext }: Ste
     };
   }, [activeDoctorId, activeDate, service.id]);
 
-  // Reset slot selection when changing doctor or date (unless the same one is still valid)
   useEffect(() => {
     setActiveSlot((current) => {
       if (!current) return null;
@@ -150,29 +146,29 @@ export function Step2Doctor({ service, selected, onSelect, onBack, onNext }: Ste
   const canProceed = activeDoctor !== null && activeSlot !== null;
 
   return (
-    <div>
-      <h2 className="text-xl text-brand-navy md:text-2xl">Həkim və vaxt seçin</h2>
+    <div className="animate-in fade-in slide-in-from-bottom-2 duration-300 ease-out">
+      <h2 className="text-xl text-brand-navy md:text-2xl font-bold">Həkim və vaxt seçin</h2>
       <p className="mt-1 text-sm text-brand-slate">
         Xidmət: <span className="font-medium text-brand-navy">{service.name}</span> ·{" "}
         {service.durationMinutes} dəq
       </p>
 
       {doctorsError && (
-        <div className="mt-6 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+        <div className="mt-6 rounded-xl border border-red-200 bg-red-50 px-4 py-4 text-sm text-red-700 animate-in fade-in">
           {doctorsError}
         </div>
       )}
 
-      <div className="mt-6 grid gap-6 lg:grid-cols-[280px_1fr]">
+      <div className="mt-6 grid gap-6 lg:grid-cols-[300px_1fr]">
         {/* Doctors */}
-        <div className="space-y-2">
-          <h3 className="text-sm font-medium text-brand-navy">Həkim</h3>
+        <div className="space-y-3">
+          <h3 className="text-sm font-semibold text-brand-navy uppercase tracking-wider">Həkim</h3>
           {doctors === null && !doctorsError && (
             <>
               {[0, 1, 2].map((i) => (
                 <div
                   key={i}
-                  className="h-20 animate-pulse rounded-lg border border-brand-gray-border bg-brand-gray-light"
+                  className="h-24 animate-pulse rounded-2xl border border-brand-gray-border bg-brand-gray-light"
                 />
               ))}
             </>
@@ -185,35 +181,38 @@ export function Step2Doctor({ service, selected, onSelect, onBack, onNext }: Ste
                 type="button"
                 onClick={() => setActiveDoctorId(d.id)}
                 className={[
-                  "flex w-full items-center gap-3 rounded-lg border p-3 text-left transition-colors",
+                  "relative flex w-full items-center gap-4 rounded-2xl border p-4 text-left transition-all duration-200",
                   isActive
-                    ? "border-brand-cyan bg-brand-cyan-light"
-                    : "border-brand-gray-border bg-white hover:border-brand-cyan",
+                    ? "border-brand-cyan bg-brand-cyan/5 shadow-md shadow-brand-cyan/10 ring-1 ring-brand-cyan"
+                    : "border-brand-gray-border bg-white hover:border-brand-cyan/50 hover:shadow-sm hover:-translate-y-0.5",
                 ].join(" ")}
                 aria-pressed={isActive}
               >
-                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-brand-cyan-light text-sm font-semibold text-brand-cyan">
-                  {initials(d.name) || <User className="h-4 w-4" aria-hidden />}
+                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-brand-cyan/10 text-base font-bold text-brand-cyan">
+                  {initials(d.name) || <User className="h-5 w-5" aria-hidden />}
                 </div>
-                <div className="min-w-0">
-                  <div className="truncate text-sm font-medium text-brand-navy">{d.name}</div>
+                <div className="min-w-0 flex-1">
+                  <div className="truncate text-base font-bold text-brand-navy">{d.name}</div>
                   <div className="truncate text-sm text-brand-slate">{d.specialty}</div>
                 </div>
+                {isActive && (
+                  <CheckCircle2 className="h-5 w-5 text-brand-cyan animate-in zoom-in" />
+                )}
               </button>
             );
           })}
         </div>
 
         {/* Date + slots */}
-        <div>
+        <div className="rounded-2xl border border-brand-gray-border bg-white p-5 shadow-sm">
           <div className="flex items-center justify-between">
-            <h3 className="text-sm font-medium text-brand-navy">Tarix seçin</h3>
-            <div className="flex items-center gap-1">
+            <h3 className="text-sm font-semibold text-brand-navy uppercase tracking-wider">Tarix seçin</h3>
+            <div className="flex items-center gap-1.5">
               <button
                 type="button"
                 aria-label="Əvvəlki həftə"
                 onClick={() => setWeekStartIso((iso) => addDaysIso(iso, -7))}
-                className="rounded-md border border-brand-gray-border p-1.5 text-brand-slate hover:border-brand-cyan hover:text-brand-cyan"
+                className="flex h-8 w-8 items-center justify-center rounded-lg border border-brand-gray-border text-brand-slate hover:border-brand-cyan hover:text-brand-cyan hover:bg-brand-gray-light transition-colors"
               >
                 <ChevronLeft className="h-4 w-4" aria-hidden />
               </button>
@@ -221,14 +220,14 @@ export function Step2Doctor({ service, selected, onSelect, onBack, onNext }: Ste
                 type="button"
                 aria-label="Növbəti həftə"
                 onClick={() => setWeekStartIso((iso) => addDaysIso(iso, 7))}
-                className="rounded-md border border-brand-gray-border p-1.5 text-brand-slate hover:border-brand-cyan hover:text-brand-cyan"
+                className="flex h-8 w-8 items-center justify-center rounded-lg border border-brand-gray-border text-brand-slate hover:border-brand-cyan hover:text-brand-cyan hover:bg-brand-gray-light transition-colors"
               >
                 <ChevronRight className="h-4 w-4" aria-hidden />
               </button>
             </div>
           </div>
 
-          <div className="mt-3 grid grid-cols-7 gap-1.5">
+          <div className="mt-4 grid grid-cols-7 gap-1.5 sm:gap-2">
             {weekDays.map((iso) => {
               const dateObj = dateFromIso(iso);
               const isPast = iso < todayIso;
@@ -241,16 +240,16 @@ export function Step2Doctor({ service, selected, onSelect, onBack, onNext }: Ste
                   onClick={() => setActiveDate(iso)}
                   aria-pressed={isActive}
                   className={[
-                    "flex flex-col items-center justify-center rounded-lg border px-1 py-2 text-sm transition-colors",
+                    "flex flex-col items-center justify-center rounded-xl border py-2.5 text-sm transition-all duration-200",
                     isPast
-                      ? "cursor-not-allowed border-brand-gray-border bg-brand-gray-light text-slate-300"
+                      ? "cursor-not-allowed border-brand-gray-border bg-brand-gray-light/50 text-brand-slate/40"
                       : isActive
-                        ? "border-brand-cyan bg-brand-cyan text-white"
-                        : "border-brand-gray-border bg-white text-brand-slate hover:border-brand-cyan hover:text-brand-cyan",
+                        ? "border-brand-cyan bg-brand-cyan text-white shadow-md shadow-brand-cyan/20 scale-105"
+                        : "border-brand-gray-border bg-white text-brand-slate hover:border-brand-cyan hover:text-brand-cyan hover:-translate-y-0.5 hover:shadow-sm",
                   ].join(" ")}
                 >
-                  <span className="text-xs uppercase">{azWeekdayShort(dateObj)}</span>
-                  <span className="mt-0.5 font-semibold">
+                  <span className="text-xs uppercase tracking-wider opacity-80">{azWeekdayShort(dateObj)}</span>
+                  <span className="mt-1 text-lg font-bold">
                     {formatDateBaku(dateObj).slice(0, 2)}
                   </span>
                 </button>
@@ -258,36 +257,37 @@ export function Step2Doctor({ service, selected, onSelect, onBack, onNext }: Ste
             })}
           </div>
 
-          <div className="mt-6">
-            <h3 className="text-sm font-medium text-brand-navy">
-              Boş vaxtlar — {azDateLong(dateFromIso(activeDate))}
+          <div className="mt-8">
+            <h3 className="text-sm font-semibold text-brand-navy uppercase tracking-wider border-b border-brand-gray-border pb-2 mb-4">
+              Boş vaxtlar — <span className="text-brand-cyan font-bold">{azDateLong(dateFromIso(activeDate))}</span>
             </h3>
 
             {slotsLoading && (
-              <div className="mt-3 grid grid-cols-3 gap-2 sm:grid-cols-4 md:grid-cols-5">
+              <div className="grid grid-cols-3 gap-2 sm:grid-cols-4 md:grid-cols-5">
                 {Array.from({ length: 10 }).map((_, i) => (
                   <div
                     key={i}
-                    className="h-10 animate-pulse rounded-lg border border-brand-gray-border bg-brand-gray-light"
+                    className="h-11 animate-pulse rounded-xl border border-brand-gray-border bg-brand-gray-light"
                   />
                 ))}
               </div>
             )}
 
             {!slotsLoading && slotsError && (
-              <div className="mt-3 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+              <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-4 text-sm text-red-700 animate-in fade-in">
                 {slotsError}
               </div>
             )}
 
             {!slotsLoading && !slotsError && slots !== null && slots.length === 0 && (
-              <div className="mt-3 rounded-lg border border-brand-gray-border bg-brand-gray-light px-4 py-6 text-center text-sm text-brand-slate">
-                Bu gün bu həkim üçün boş vaxt yoxdur. Başqa gün seçin.
+              <div className="rounded-xl border border-brand-gray-border bg-brand-gray-light/50 px-4 py-8 text-center animate-in fade-in">
+                <p className="text-brand-navy font-medium">Bu gün üçün boş vaxt yoxdur.</p>
+                <p className="text-sm text-brand-slate mt-1">Zəhmət olmasa başqa gün seçin.</p>
               </div>
             )}
 
             {!slotsLoading && slots && slots.length > 0 && (
-              <div className="mt-3 grid grid-cols-3 gap-2 sm:grid-cols-4 md:grid-cols-5">
+              <div className="grid grid-cols-3 gap-2 sm:grid-cols-4 md:grid-cols-5 animate-in fade-in">
                 {slots.map((slot) => {
                   const isSelected = activeSlot?.startTime === slot.startTime;
                   return (
@@ -297,12 +297,12 @@ export function Step2Doctor({ service, selected, onSelect, onBack, onNext }: Ste
                       disabled={!slot.available}
                       onClick={() => handleSlotClick(slot)}
                       className={[
-                        "rounded-lg border px-3 py-2 text-sm transition-colors",
+                        "rounded-xl border py-2.5 text-sm font-medium transition-all duration-200",
                         !slot.available
-                          ? "cursor-not-allowed border-brand-gray-border bg-brand-gray-light text-slate-300 line-through"
+                          ? "cursor-not-allowed border-brand-gray-border bg-brand-gray-light/50 text-brand-slate/40 line-through"
                           : isSelected
-                            ? "border-brand-cyan bg-brand-cyan text-white"
-                            : "border-brand-gray-border bg-white text-brand-navy hover:border-brand-cyan hover:text-brand-cyan",
+                            ? "border-brand-cyan bg-brand-cyan text-white shadow-md shadow-brand-cyan/20 scale-[1.02]"
+                            : "border-brand-gray-border bg-white text-brand-navy hover:border-brand-cyan hover:text-brand-cyan hover:-translate-y-0.5 hover:shadow-sm",
                       ].join(" ")}
                     >
                       {slot.displayTime}
@@ -315,22 +315,22 @@ export function Step2Doctor({ service, selected, onSelect, onBack, onNext }: Ste
         </div>
       </div>
 
-      <div className="mt-8 flex items-center justify-between">
+      <div className="mt-8 flex flex-col-reverse sm:flex-row items-center justify-between gap-3 pt-4 border-t border-brand-gray-border">
         <button
           type="button"
           onClick={onBack}
-          className="inline-flex items-center gap-2 rounded-lg border border-brand-gray-border px-5 py-2.5 text-brand-slate transition-colors hover:border-brand-cyan hover:text-brand-cyan"
+          className="w-full sm:w-auto inline-flex justify-center items-center gap-2 rounded-xl border border-brand-gray-border px-6 py-3 text-sm font-medium text-brand-slate transition-colors hover:border-brand-cyan hover:text-brand-cyan hover:bg-brand-gray-light"
         >
           <ArrowLeft className="h-4 w-4" aria-hidden />
-          Geri
+          Geri qayıt
         </button>
         <button
           type="button"
           onClick={onNext}
           disabled={!canProceed}
-          className="inline-flex items-center gap-2 rounded-lg bg-brand-cyan px-5 py-2.5 font-medium text-white shadow-sm transition-colors hover:bg-brand-cyan-dark disabled:cursor-not-allowed disabled:opacity-50"
+          className="w-full sm:w-auto inline-flex justify-center items-center gap-2 rounded-xl bg-gradient-to-r from-brand-cyan to-brand-cyan-dark px-8 py-3 text-sm font-bold text-white shadow-md shadow-brand-cyan/20 transition-all hover:shadow-lg hover:shadow-brand-cyan/30 hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-70 disabled:hover:translate-y-0"
         >
-          Növbəti
+          Növbəti addım
           <ArrowRight className="h-4 w-4" aria-hidden />
         </button>
       </div>

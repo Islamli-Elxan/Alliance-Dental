@@ -16,6 +16,11 @@ export interface TimeSlot {
 export interface ApiResponse<T> {
   data?: T;
   error?: string;
+  meta?: {
+    total: number;
+    page: number;
+    pageCount: number;
+  };
 }
 
 export interface BookingRequestBody {

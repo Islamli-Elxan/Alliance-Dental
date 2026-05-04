@@ -9,6 +9,7 @@ import {
   ShieldCheck,
   ArrowRight,
   type LucideIcon,
+  CheckCircle2,
 } from "lucide-react";
 import { formatPriceAzn } from "@/lib/utils";
 import type { ServiceDto } from "./types";
@@ -59,19 +60,19 @@ export function Step1Service({ selectedServiceId, onSelect, onNext }: Step1Servi
   }, []);
 
   return (
-    <div>
-      <h2 className="text-xl text-brand-navy md:text-2xl">Hansı xidməti istəyirsiniz?</h2>
+    <div className="animate-in fade-in slide-in-from-bottom-2 duration-300 ease-out">
+      <h2 className="text-xl text-brand-navy md:text-2xl font-bold">Hansı xidməti istəyirsiniz?</h2>
       <p className="mt-1 text-sm text-brand-slate">
         İstədiyiniz proseduru seçin. Növbəti addımda həkim və vaxt seçəcəksiniz.
       </p>
 
       {error && (
-        <div className="mt-6 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+        <div className="mt-6 rounded-xl border border-red-200 bg-red-50 px-4 py-4 text-sm text-red-700 animate-in fade-in">
           {error}
         </div>
       )}
 
-      <div className="mt-6 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {services === null && !error && <ServiceSkeletons />}
 
         {services?.map((service) => {
@@ -82,27 +83,32 @@ export function Step1Service({ selectedServiceId, onSelect, onNext }: Step1Servi
               type="button"
               onClick={() => onSelect(service)}
               className={[
-                "flex flex-col items-start gap-3 rounded-xl border p-5 text-left transition-colors",
+                "relative flex flex-col items-start gap-4 rounded-2xl border p-5 text-left transition-all duration-200",
                 isSelected
-                  ? "border-brand-cyan bg-brand-cyan-light"
-                  : "border-brand-gray-border bg-white hover:border-brand-cyan",
+                  ? "border-brand-cyan bg-brand-cyan/5 shadow-md shadow-brand-cyan/10 ring-1 ring-brand-cyan"
+                  : "border-brand-gray-border bg-white hover:border-brand-cyan/50 hover:shadow-sm hover:-translate-y-0.5",
               ].join(" ")}
               aria-pressed={isSelected}
             >
-              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-brand-cyan-light">
-                <ServiceIcon name={service.iconName} />
-              </div>
-              <div>
-                <div className="font-medium text-brand-navy">{service.name}</div>
-                {service.description && (
-                  <p className="mt-1 text-sm text-brand-slate">{service.description}</p>
+              <div className="flex w-full items-start justify-between">
+                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-brand-cyan/10">
+                  <ServiceIcon name={service.iconName} />
+                </div>
+                {isSelected && (
+                  <CheckCircle2 className="h-5 w-5 text-brand-cyan animate-in zoom-in" />
                 )}
               </div>
-              <div className="mt-auto flex items-center gap-2">
-                <span className="rounded-md bg-brand-gray-light px-2 py-1 text-sm text-brand-slate">
+              <div className="flex-1">
+                <div className="font-semibold text-brand-navy text-lg leading-tight">{service.name}</div>
+                {service.description && (
+                  <p className="mt-1.5 text-sm text-brand-slate leading-snug line-clamp-2">{service.description}</p>
+                )}
+              </div>
+              <div className="mt-2 flex w-full items-center justify-between border-t border-brand-gray-border/60 pt-4">
+                <span className="flex items-center gap-1.5 rounded-lg bg-brand-gray-light px-2.5 py-1 text-xs font-medium text-brand-slate">
                   {service.durationMinutes} dəq
                 </span>
-                <span className="rounded-md bg-brand-cyan-light px-2 py-1 text-sm font-medium text-brand-cyan">
+                <span className="rounded-lg bg-brand-cyan/10 px-2.5 py-1 text-sm font-bold text-brand-cyan">
                   {formatPriceAzn(service.price)}
                 </span>
               </div>
@@ -111,14 +117,14 @@ export function Step1Service({ selectedServiceId, onSelect, onNext }: Step1Servi
         })}
       </div>
 
-      <div className="mt-8 flex justify-end">
+      <div className="mt-8 flex justify-end border-t border-brand-gray-border pt-4">
         <button
           type="button"
           onClick={onNext}
           disabled={!selectedServiceId}
-          className="inline-flex items-center gap-2 rounded-lg bg-brand-cyan px-5 py-2.5 font-medium text-white shadow-sm transition-colors hover:bg-brand-cyan-dark disabled:cursor-not-allowed disabled:opacity-50"
+          className="w-full sm:w-auto inline-flex justify-center items-center gap-2 rounded-xl bg-gradient-to-r from-brand-cyan to-brand-cyan-dark px-8 py-3 text-sm font-bold text-white shadow-md shadow-brand-cyan/20 transition-all hover:shadow-lg hover:shadow-brand-cyan/30 hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-70 disabled:hover:translate-y-0"
         >
-          Növbəti
+          Növbəti addım
           <ArrowRight className="h-4 w-4" aria-hidden />
         </button>
       </div>
@@ -132,7 +138,7 @@ function ServiceSkeletons() {
       {[0, 1, 2, 3, 4, 5].map((i) => (
         <div
           key={i}
-          className="h-40 animate-pulse rounded-xl border border-brand-gray-border bg-brand-gray-light"
+          className="h-48 animate-pulse rounded-2xl border border-brand-gray-border bg-brand-gray-light"
         />
       ))}
     </>

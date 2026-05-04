@@ -7,7 +7,9 @@ import { AlertCircle, Loader2 } from "lucide-react";
 
 export function LoginForm() {
   const searchParams = useSearchParams();
-  const callbackUrl = searchParams.get("callbackUrl") ?? "/admin";
+  const rawCallback = searchParams.get("callbackUrl") ?? "/admin";
+  // Prevent open redirect — only allow internal /admin paths
+  const callbackUrl = rawCallback.startsWith("/admin") ? rawCallback : "/admin";
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");

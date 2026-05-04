@@ -8,9 +8,10 @@ import type { BookingResultDto } from "./types";
 interface BookingSuccessProps {
   result: BookingResultDto;
   onReset: () => void;
+  onComplete?: () => void;
 }
 
-export function BookingSuccess({ result, onReset }: BookingSuccessProps) {
+export function BookingSuccess({ result, onReset, onComplete }: BookingSuccessProps) {
   return (
     <div className="text-center">
       <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-brand-cyan-light">
@@ -62,13 +63,23 @@ export function BookingSuccess({ result, onReset }: BookingSuccessProps) {
         >
           Yeni görüş al
         </button>
-        <Link
-          href="/"
-          className="inline-flex items-center gap-2 rounded-lg border border-brand-gray-border px-5 py-2.5 text-brand-slate transition-colors hover:border-brand-cyan hover:text-brand-cyan"
-        >
-          <Phone className="h-4 w-4" aria-hidden />
-          Əsas səhifəyə qayıt
-        </Link>
+        {onComplete ? (
+          <button
+            type="button"
+            onClick={onComplete}
+            className="inline-flex items-center gap-2 rounded-lg border border-brand-gray-border px-5 py-2.5 text-brand-slate transition-colors hover:border-brand-cyan hover:text-brand-cyan"
+          >
+            Bağla
+          </button>
+        ) : (
+          <Link
+            href="/"
+            className="inline-flex items-center gap-2 rounded-lg border border-brand-gray-border px-5 py-2.5 text-brand-slate transition-colors hover:border-brand-cyan hover:text-brand-cyan"
+          >
+            <Phone className="h-4 w-4" aria-hidden />
+            Əsas səhifəyə qayıt
+          </Link>
+        )}
       </div>
     </div>
   );

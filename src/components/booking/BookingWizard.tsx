@@ -34,7 +34,11 @@ const INITIAL_STATE: WizardState = {
   result: null,
 };
 
-export function BookingWizard() {
+export function BookingWizard({
+  onComplete,
+}: {
+  onComplete?: () => void;
+} = {}) {
   const [state, setState] = useState<WizardState>(INITIAL_STATE);
 
   const goTo = useCallback((step: Step) => setState((s) => ({ ...s, step })), []);
@@ -104,7 +108,7 @@ export function BookingWizard() {
         )}
 
         {state.step === 4 && state.result && (
-          <BookingSuccess result={state.result} onReset={reset} />
+          <BookingSuccess result={state.result} onReset={reset} onComplete={onComplete} />
         )}
       </div>
     </div>

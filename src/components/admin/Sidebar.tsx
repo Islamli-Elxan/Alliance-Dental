@@ -3,11 +3,22 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { signOut } from "next-auth/react";
-import { LayoutDashboard, Calendar, MessageSquare, LogOut } from "lucide-react";
+import {
+  LayoutDashboard,
+  Calendar,
+  MessageSquare,
+  LogOut,
+  Stethoscope,
+  Settings,
+  Users,
+} from "lucide-react";
 
 const NAV = [
   { href: "/admin", label: "İdarə paneli", icon: LayoutDashboard, exact: true },
   { href: "/admin/appointments", label: "Görüşlər", icon: Calendar, exact: false },
+  { href: "/admin/patients", label: "Pasiyentlər", icon: Users, exact: false },
+  { href: "/admin/doctors", label: "Həkimlər", icon: Stethoscope, exact: false },
+  { href: "/admin/services", label: "Xidmətlər", icon: Settings, exact: false },
   { href: "/admin/notifications", label: "Bildirişlər", icon: MessageSquare, exact: false },
 ];
 

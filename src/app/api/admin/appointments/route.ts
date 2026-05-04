@@ -20,7 +20,8 @@ const querySchema = z.object({
     .regex(/^\d{4}-\d{2}-\d{2}$/)
     .optional(),
   q: z.string().trim().min(1).max(100).optional(),
-  limit: z.coerce.number().int().positive().max(500).optional(),
+  limit: z.coerce.number().int().positive().max(500).optional().default(50),
+  page: z.coerce.number().int().positive().optional().default(1),
 });
 
 export interface AdminAppointmentDto {
@@ -34,6 +35,8 @@ export interface AdminAppointmentDto {
   doctor: { id: string; name: string };
   service: { id: string; name: string };
   notes: string | null;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export async function GET(
@@ -48,6 +51,7 @@ export async function GET(
       to: searchParams.get("to") ?? undefined,
       q: searchParams.get("q") ?? undefined,
       limit: searchParams.get("limit") ?? undefined,
+      page: searchParams.get("page") ?? undefined,
     });
     if (!parsed.success) {
       return NextResponse.json({ error: "Yanlış sorğu parametrləri" }, { status: 400 });
@@ -75,15 +79,23 @@ export async function GET(
       ];
     }
 
-    const appointments = await prisma.appointment.findMany({
-      where,
-      orderBy: { startTime: "desc" },
-      take: filters.limit ?? 200,
-      include: {
-        doctor: { select: { id: true, name: true } },
-        service: { select: { id: true, name: true } },
-      },
-    });
+    const limit = filters.limit;
+    const page = filters.page;
+    const skip = (page - 1) * limit;
+
+    const [total, appointments] = await Promise.all([
+      prisma.appointment.count({ where }),
+      prisma.appointment.findMany({
+        where,
+        orderBy: { startTime: "desc" },
+        take: limit,
+        skip,
+        include: {
+          doctor: { select: { id: true, name: true } },
+          service: { select: { id: true, name: true } },
+        },
+      }),
+    ]);
 
     const data: AdminAppointmentDto[] = appointments.map((a) => ({
       id: a.id,
@@ -96,9 +108,18 @@ export async function GET(
       doctor: a.doctor,
       service: a.service,
       notes: a.notes,
+      createdAt: a.createdAt.toISOString(),
+      updatedAt: a.updatedAt.toISOString(),
     }));
 
-    return NextResponse.json({ data });
+    return NextResponse.json({
+      data,
+      meta: {
+        total,
+        page,
+        pageCount: Math.ceil(total / limit),
+      },
+    });
   } catch (err: unknown) {
     if (err instanceof AdminUnauthorizedError) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
