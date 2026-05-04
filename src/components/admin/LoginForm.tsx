@@ -1,12 +1,11 @@
 "use client";
 
 import { useState, type FormEvent } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { signIn } from "next-auth/react";
 import { AlertCircle, Loader2 } from "lucide-react";
 
 export function LoginForm() {
-  const router = useRouter();
   const searchParams = useSearchParams();
   const callbackUrl = searchParams.get("callbackUrl") ?? "/admin";
 
@@ -29,8 +28,7 @@ export function LoginForm() {
         setError("Email və ya şifrə yanlışdır");
         return;
       }
-      router.replace(callbackUrl);
-      router.refresh();
+      window.location.href = callbackUrl;
     } catch {
       setError("Daxil olmaq mümkün olmadı");
     } finally {
